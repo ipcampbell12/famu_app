@@ -82,46 +82,34 @@ function markAttendance(familyNum, adults,students,date){
  
 }
 
-function getSheets(type){
-  Logger.log(type)
-  const app = SpreadsheetApp;
-  if(type==="adults"){
-    const ss = app.openByUrl('https://docs.google.com/spreadsheets/d/1cv8kIR6YtmO8bXzerDEZMbxqiNiOrVHoCc3RLZt3sfM/edit#gid=1005068214');
-    const sheets = ss.getSheets().filter(sheet => sheet.getName().startsWith('S')).map(sheet => sheet.getName());
-    const updatedSheets = [...["Select a class"],...sheets]
-    Logger.log(updatedSheets)
-    return updatedSheets;
-  } else if(type==="students"){
-    const ss =app.openByUrl('https://docs.google.com/spreadsheets/d/1EHpeAvAKNWwrsBLfqGAS93eczmF5uYOJImvF4Td9Jes/edit#gid=1005068214')
-    const sheets = ss.getSheets().slice(2).map(sheet => sheet.getName());
-    const updatedSheets = [...["Select a class"],...sheets]
-    Logger.log(updatedSheets)
-    return updatedSheets;
+function findFamily(sheet,date,familyNum){
+  if(sheet==="Web App Responses"){
+    Logger.log("No column needed");
+    return; 
   }
-  
+  console.log(familyNum)
+  const tf = sheet.createTextFinder(familyNum)
+  const row = tf.findNext().getRow();
+  Logger.log(`The row for ${familyNum} is ${row}`)
+  const dateTf = sheet.createTextFinder(date)
+  const column = dateTf.findNext().getColumn();
+  Logger.log(`The column for ${familyNum} is ${column}`)
+  return [row,column]
 }
 
-function logIt(){
-  getSheets('students')
-}
+// function getSheets(){
+//   const ss = getSs()
+//   const sheets = ss.getSheets().filter(sheet => sheet.getName().startsWith("S2-")||sheet.getName().startsWith("S1-")).map(sheet => sheet.getName());
+//   const sheetList = [...["Select a class"],...sheets]
+//   return sheetList;
+// }
 
-function getStudents(sheet,type){
-  if(type==="adults"){
-    const app = SpreadsheetApp;
-    const ss = app.openByUrl('https://docs.google.com/spreadsheets/d/1cv8kIR6YtmO8bXzerDEZMbxqiNiOrVHoCc3RLZt3sfM/edit#gid=1005068214');
+function getStudents(sheet){
+    const ss = getSs()
     const ws = ss.getSheetByName(sheet);
     const range = ws.getRange(3,1, ws.getLastRow()-1,3);
     const values = range.getValues().filter(val => val!=='');
     return values;
-  } else if(type==="students"){
-     const app = SpreadsheetApp;
-    const ss = app.openByUrl('https://docs.google.com/spreadsheets/d/1EHpeAvAKNWwrsBLfqGAS93eczmF5uYOJImvF4Td9Jes/edit#gid=2110217227');
-    const ws = ss.getSheetByName(sheet);
-    const range = ws.getRange(3,1, ws.getLastRow()-1,3);
-    const values = range.getValues().filter(val => val!=='');
-    return values;
-  }
- 
 }
 
 function markClassAttendance(course,attendance,date,type){
@@ -250,6 +238,17 @@ function addStudentToClass(person,sheets){
     class2.getRange(class2.getLastRow()+1,1,1,5).setValues([regArr])
 }
 
+
+function serverSideMarkInactive(num,date){
+    const ss = getSs();
+    const signIn = getSheet("Sign In Sheet");
+    const responses = getSheet("Web App Responses");
+    const signInRow = findFamily(signIn,date,num)[0];
+    const responsesRow = findFamily(responses,date,num)[0];
+    // Logger.log(signInRow)
+    // Logger.log(responsesRow)
+
+}
 
 function include(filename){
   return HtmlService.createHtmlOutputFromFile(filename).getContent()

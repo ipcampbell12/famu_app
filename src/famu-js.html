@@ -47,7 +47,8 @@
                   <option value="4">4</option>
                   <option value="5">5</option>
               </select>
-              <button type="button" class="px-1 btn btn-primary ms-2 px-1 submit-button" id="button-${family[0]}">Submit</button>
+              <button type="button" class="px-1 btn btn-primary ms-1 px-1 submit-button" id="button-${family[0]}">Submit</button>
+              <button type="button" class="px-1 btn btn-danger ms-2 px-1 submit-button" id="button-${family[0]}-inactive">Mark Inactive</button>
             </div>
           </div>
       `;
@@ -71,7 +72,10 @@
          //google.script.run.markAttendance(familyNum,numAdults,numStudents)
          
          }
-
+    
+    function markInactive(num){
+          google.script.run.serverSideMarkInactive(num);
+    }
 
      function getData(){
         addSpinner();
@@ -97,11 +101,18 @@
       //console.log(`Target is ${target}`)
       const num = target.split('-')[1]
       const test = `button-${num}`
+      const date = document.getElementById('class-dates-main').value;
+      const inactive = `button-${num}-inactive`;
      // console.log(`Test is ${test}`)
         if(target===test){
           familySelect(event)
           }
+
+        if(target===inactive){
+            markInactive(num,date)
+        }
       })
+    
     
 
       function removeSpinner(){
@@ -365,14 +376,6 @@
         el.value = str;
 
         console.log(el.value)
-
-        // el.setAttribute('readonly', '');
-        // el.style.position = 'absolute';
-        // el.style.left = '-9999px';
-        // document.body.appendChild(el);
-        // el.select();
-        // document.execCommand('copy');
-        // document.body.removeChild(el);
 
         navigator.clipboard.writeText(str)
         addAlert("copied-alert-placeholder","success","Name copied to clipboard")
