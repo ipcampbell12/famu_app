@@ -156,30 +156,38 @@ function createSheets() {
     const ss = getSs();
     //const famuSS = app.getActiveSpreadsheet();
     const classSheet = ss.getSheetByName('Classes');
-    const adultValues = classSheet.getRange(2,2,classSheet.getLastRow()-1,1).getValues()
-    const studentValues = classSheet.getRange(2,4,classSheet.getLastRow()-1,1).getValues()
+    const noSession = ['PreK','Kinder','Teen Pathways (6-12)'];
+    const noSessionValues = classSheet.getRange(2,4,classSheet.getLastRow()-1,1).getValues().filter(course => noSession.includes(course[0]));
+    const adultValues = classSheet.getRange(2,2,classSheet.getLastRow()-1,1).getValues().filter(course => !noSession.includes(course[0]))
+    const studentValues = classSheet.getRange(2,4,classSheet.getLastRow()-1,1).getValues().filter(course => !noSession.includes(course[0]));
+    Logger.log(noSessionValues)
+    Logger.log(adultValues)
+    Logger.log(studentValues)
     const dates = serverSideGetClassDates().filter(date => !date.includes('Select')).map(date => [date]);
     const headers = [...["FamU Id"],...["Last Name"],...["First Name"],...["Family Number"],...["Active?"],...dates];
+    
 
     const adultSession1 = Array.from(new Set(adultValues.map(row => `S1-${row[0]}`))).filter(row => row !== "S1-");
     const adultSsession2 = Array.from(new Set(adultValues.map(row => `S2-${row[0]}`))).filter(row => row !== "S2-");
     const studentSession1 = Array.from(new Set(studentValues.map(row => `S1-${row[0]}`))).filter(row => row !== "S1-");
     const studentSession2 = Array.from(new Set(studentValues.map(row => `S2-${row[0]}`))).filter(row => row !== "S2-");
+    const noSessionArr = noSessionValues.map(row => row[0])
+    const allCourseSessions = [...adultSession1,...adultSsession2,...studentSession1,...studentSession2,...noSessionArr]
+    Logger.log(allCourseSessions)
+    allCourseSessions.map(course => ss.insertSheet().setName(course))
+    // adultSession1.map(course => ss.insertSheet().setName(course))
+    // adultSsession2.map(course => ss.insertSheet().setName(course))
+    // studentSession1.map(course => ss.insertSheet().setName(course))
+    // studentSession2.map(course => ss.insertSheet().setName(course))
 
-
-    adultSession1.map(course => ss.insertSheet().setName(course))
-    adultSsession2.map(course => ss.insertSheet().setName(course))
-    studentSession1.map(course => ss.insertSheet().setName(course))
-    studentSession2.map(course => ss.insertSheet().setName(course))
-
-   const sessionSheets = ss.getSheets().filter(sheet => sheet.getName().startsWith("S2-")||sheet.getName().startsWith("S1-"));
+   const sessionSheets = ss.getSheets().filter(sheet => allCourseSessions.includes(sheet.getName()));
 
    for (let sheet of sessionSheets){
       sheet.getRange(1,1).setValue(sheet.getSheetName()).setFontSize(15).setFontWeight('bold')
       sheet.getRange(2,1,1,headers.length).setValues([headers]).setFontWeight('bold').setFontSize(12).setBorder(null,null,true,null,null,null).setWrap(true).setBackground("gold")
       sheet.setFrozenColumns(5)
       sheet.setFrozenRows(2)
-   }
+  }
   //  sessionSheets.forEach(sheet => sheet.getRange(1,1,1,headers.length).setValues([headers]).setFontWeight('bold').setFontSize(18).setBorder(null,null,true))
   //  sessionSheets.forEach(sheet => sheet.setFrozenRows(1))
     // const allClasses = session1.concat(session2)
