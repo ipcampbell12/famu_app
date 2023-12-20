@@ -1,285 +1,286 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>FamU Web Appt</title>
-      <!-- <link rel="icon" type="image/png" href="https://drive.google.com/uc?id=1jwlVZjmUVE5NIdjTw8agaztcunHH3C7T"> -->
-      <!-- <link rel="icon" type="image/png" href="https://lh3.google.com/u/0/d/1jwlVZjmUVE5NIdjTw8agaztcunHH3C7T"> -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" 
-    crossorigin="anonymous">
-     <?!= include("famu-css");?>
-  </head>
-  <body>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FamU Web Appt</title>
+  <!-- <link rel="icon" type="image/png" href="https://drive.google.com/uc?id=1jwlVZjmUVE5NIdjTw8agaztcunHH3C7T"> -->
+  <!-- <link rel="icon" type="image/png" href="https://lh3.google.com/u/0/d/1jwlVZjmUVE5NIdjTw8agaztcunHH3C7T"> -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+  <?!= include("famu-css");?>
+</head>
+
+<body>
   <div id="test" class="overall-container">
     <div id="test" class="container">
 
-        <div id="data">
-          <div class="container2">
-              <img class="ms-2 me-2" src="https://lh3.google.com/u/0/d/1g-NtWP9uygARXCU1xDQnekfGTWilNEAS" width="50px" height="auto"> 
-              <h1>FamU Attendance Manager</h1>
-              <img class="ms-2 me-2" src="https://lh3.google.com/u/0/d/1g-NtWP9uygARXCU1xDQnekfGTWilNEAS" width="50px" height="auto"> 
-          </div>
-          <h3>What what would you like to do?</h3>
-          <br>
-          <div class="mb-3 container">
-            <button type="button" href="#" class="btn btn-primary ms-5 me-5 mt-5 mb-5 btn-lg" id="modal-class-attendance" data-bs-toggle="modal" data-bs-target="#modal2" onclick="openModal(event)">
-                Take Class Attendance
-              </button>
-              <button type="button" href="#" class="btn btn-primary ms-5 me-5 mt-5 mb-5 btn-lg" id="modal-family-signin" data-bs-toggle="modal" data-bs-target="#modal1" onclick="openModal(event)">
-                Sign In Family
-              </button>
-              <!-- <button type="button" class="btn btn-primary ms-5 me-5 mt-5 mb-5 btn-lg" id="modal-staff-signin" data-bs-toggle="modal" data-bs-target="#staticBackdrop" onclick="getDates()">
+      <div id="data">
+        <div class="container2">
+          <img class="ms-2 me-2" src="https://lh3.google.com/u/0/d/1g-NtWP9uygARXCU1xDQnekfGTWilNEAS" width="50px"
+            height="auto">
+          <h1>TEST FamU Attendance Manager</h1>
+          <img class="ms-2 me-2" src="https://lh3.google.com/u/0/d/1g-NtWP9uygARXCU1xDQnekfGTWilNEAS" width="50px"
+            height="auto">
+        </div>
+        <h3>What what would you like to do?</h3>
+        <br>
+        <div class="mb-3 container">
+          <button type="button" href="#" class="btn btn-primary ms-5 me-5 mt-5 mb-5 btn-lg" id="modal-class-attendance"
+            data-bs-toggle="modal" data-bs-target="#modal2">
+            Take Class Attendance
+          </button>
+          <button type="button" href="#" class="btn btn-primary ms-5 me-5 mt-5 mb-5 btn-lg" id="modal-family-signin"
+            data-bs-toggle="modal" data-bs-target="#modal1">
+            Sign In Family
+          </button>
+          <!-- <button type="button" class="btn btn-primary ms-5 me-5 mt-5 mb-5 btn-lg" id="modal-staff-signin" data-bs-toggle="modal" data-bs-target="#staticBackdrop" onclick="getDates()">
                 Staff Sign In
               </button>  -->
-              <button type="button" href="#" class="btn btn-primary ms-5 me-5 mt-5 mb-5 btn-lg" id="modal-family-signup" data-bs-toggle="modal" data-bs-target="#modal4" onclick="openModal(event)">
-                Family Sign Up
-              </button> 
+          <button type="button" href="#" class="btn btn-primary ms-5 me-5 mt-5 mb-5 btn-lg" id="modal-family-signup"
+            data-bs-toggle="modal" data-bs-target="#modal4">
+            Register Family for FamU
+          </button>
         </div>
-      
-      
+
+
       </div>
 
     </div>
-      <div id="attendanceTakenPlaceholder"></div>
-      <div id="loadingPlaceholder"></div>
+    <div id="attendanceTakenPlaceholder"></div>
+    <div id="loadingPlaceholder"></div>
 
 
-   <!-- Class Attendance Modal -->
-        <div class="modal fade" id="modal2" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-          <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h1 class="modal-title fs-5"> Mark Class Attendance</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <h3>Mark Class Attendance</h3>
-                <select class="form-select select-date mt-2 mb-2" aria-label="Default select example" id="class-dates" >
-                  <option selected>Choose a Date</option>
-                </select>
-                  <br>
-                <select class="form-select select-date mt-2 mb-2" aria-label="Default select example" id="adults-or-students" onchange="getClassData()">
-                  <option selected>Adults or student?</option>
-                  <option value="students">Students</option>
-                  <option value="adults">Adults</option>
-                </select>
-                  <br>
-                <select class="form-select select-class mt-2 mb-2" aria-label="Default select example" id="class-attendance" onchange="getStudentsInClass(event)">
-                    <option selected>Choose a Class</option>
-                </select>
-              
-              
-                  <h5>Names</h5>
-                    <div id="already-taken"></div>
-                    <div id="name-placeholder">
-                      <ul id="name-list">
+    <!-- Class Attendance Modal -->
+    <div class="modal fade" id="modal2" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" tabindex="-1"
+      aria-labelledby="staticBackdropLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5"> Mark Class Attendance</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div id="class-dates-spinner"></div>
+          <div class="modal-body" id="modal-body-class-attendance">
+            <h3>Mark Class Attendance</h3>
+            <select class="form-select select-date mt-2 mb-2" aria-label="Default select example" id="class-dates">
+              <option selected>Choose a Date</option>
+            </select>
+            <br>
+            <select class="form-select select-date mt-2 mb-2" aria-label="Default select example"
+              id="adults-or-students">
+              <option selected>Adults or student?</option>
+              <option value="students">Students</option>
+              <option value="adults">Adults</option>
+            </select>
+            <br>
+            <br>
+            <select class="form-select select-date mt-2 mb-2" aria-label="Default select example" id="first-or-second">
+              <option selected>Which session?</option>
+              <option value="Session1">Session 1</option>
+              <option value="Session2">Session 2</option>
+            </select>
+            <br>
+            <select class="form-select select-class mt-2 mb-2" aria-label="Default select example"
+              id="class-attendance">
+              <option selected>Choose a Class</option>
+            </select>
 
 
-                      </ul>
+            <h5>Names</h5>
+            <div id="class-attendance-spinner"></div>
+            <div id="name-placeholder">
+              <button type="button" class="btn btn-danger ms-2 me-2" id="clear-students-button"
+                onclick="clearClassNames()">Clear Output</button>
+              <ul id="name-list">
 
-                    </div>
-              </div>
-              <div class="modal-footer" id="footer2">
-                <div id="class-alert-placeholder"> </div>
-                <button type="button" class="btn btn-secondary" id="class-submit-button" onclick="submitAttendance()" disabled>Submit Attendance</button>
-              </div>
+
+              </ul>
+
             </div>
           </div>
-        </div>
+          <div class="modal-footer" id="footer2">
+            <div id="class-alert-placeholder"> </div>
 
+            <button type="button" class="btn btn-secondary" id="class-submit-button" onclick="submitAttendance()"
+              disabled>Submit Attendance</button>
+
+          </div>
+        </div>
+      </div>
     </div>
-    <!-- End of class attendance Modal -->
 
-   <!-- Family Sign In Modal  -->
-        <div class="modal fade" id="modal1" data-bs-backdrop="static" role="dialog" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-          <div class="modal-dialog modal-xl">
-                   <div class="modal-content">
-                          <div class="modal-header">
-                            <h1 class="modal-title fs-5" >Main Family Sign In</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                          </div>
-                          <div class="modal-body expandable">
-                              <h3>Main Family Sign In</h3>
-                                <select class="form-select select-date mt-2 mb-2" aria-label="Default select example" id="class-dates-main" >
-                                  <option selected>Choose a Date</option>
-                                </select>
-                                <br>
-                                  <label for="familyName" class="form-label">Family Name Search</label>
-                                  <input type="text" class="form-control ms-2 me-2" id="familyName" placeholder="Type last name here" required>
-                                <br>
-                              <div class="container2">
-                                      <button type="button" class="btn btn-primary ms-2 me-2" onclick="getData()">Get Family</button>
-                                      <button type="button" class="btn btn-danger ms-2 me-2" onclick="clearData()">Clear Output</button>
-                                    </div>
-                                    <br>
-                                    <div id="liveAlertPlaceholder"></div>
-                                    <div id="family" class="family">
+  </div>
+  <!-- End of class attendance Modal -->
 
-                              </div>
-                          </div>
-                     <div class="modal-footer" id="footer1">
-                      </div>
-             </div>
+  <!-- Family Sign In Modal  -->
+  <div class="modal fade" id="modal1" data-bs-backdrop="static" role="dialog" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5">Main Family Sign In</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div id="class-dates-main-spinner"></div>
+        <div class="modal-body expandable" id="modal-body-family-signin">
+          <h3>Main Family Sign In</h3>
+
+          <select class="form-select select-date mt-2 mb-2" aria-label="Default select example" id="class-dates-main">
+            <option selected>Choose a Date</option>
+          </select>
+          <br>
+
+          <label for="familyName" class="form-label">Family Name Search</label>
+          <input type="text" class="form-control ms-2 me-2" id="familyName" placeholder="Type last name here">
+          <br>
+          <span>OR</span>
+          <br>
+
+          <label for="familyName" class="form-label">Family Number Search</label>
+          <input type="text" class="form-control ms-2 me-2" id="familyNumber" placeholder="Type family number here">
+          <br>
+          <div class="container2">
+            <button type="button" class="btn btn-primary ms-2 me-2" id="find-family-button">Get Family</button>
+            <button type="button" class="btn btn-danger ms-2 me-2" id="clear-families-button"
+              onclick="clearFamilyNames()">Clear Output</button>
+          </div>
+          <br>
+          <div id="liveAlertPlaceholder"></div>
+          <div id="family" class="family">
+
           </div>
         </div>
-        <!-- End of Family Sign In Modal -->
-
-      <!-- Family Registration Form Modal -->
-            <div class="modal fade" id="modal4" data-bs-backdrop="static" role="dialog" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                <div class="modal-dialog modal-xl">
-                  <div class="modal-content">
-                          <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="staticBackdropLabel">FamU Family Registration</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="clearRegistrationOptions()"></button>
-                          </div>
-                          <div class="modal-body">
-                          
-                          <div id="ask-adults">
-                            <h5><strong>STEP 1:ADULTS</strong></h5>
-                                  <br>
-                                <select class="form-select" aria-label="Default select example" id="num-adults" onchange="personForm(event)">
-                                  <option selected>How many adults from this family will be attending?</option>
-                                  <option value="1">1</option>
-                                  <option value="2">2</option>
-                                  <option value="3">3</option>
-                                  <option value="4">4</option>
-                                  <option value="5">5</option>
-                                </select>
-                          </div>
-                          <br>
-                           <div id="adult-container"> 
-                                 <div id="adult-form-placeholder"></div>
-                           </div> 
-                          <div id="ask-students">
-                            <h5><strong>STEP 2:STUDENTS</strong></h5>
-                                  <br>
-                                <select class="form-select" aria-label="Default select example" id="num-students" onchange="personForm(event)">
-                                  <option selected>How many students from this family will be attending?</option>
-                                  <option value="1">1</option>
-                                  <option value="2">2</option>
-                                  <option value="3">3</option>
-                                  <option value="4">4</option>
-                                  <option value="5">5</option>
-                                </select>
-                          </div>
-                          <div id="student-container"> 
-                                 <div id="student-form-placeholder"></div>
-                           </div>
-                           <br>
-                             <h5><strong>STEP 3:CONTACT INFO</strong></h5>
-                                  <br>
-                           <form id="other-info" class="form-control container text-center row w-auto">
-                                <div class="row">
-                                    <div class="col">
-                                              <label for="family-number" class="col-form-label"> Family Number</label>
-                                              <input type="text" id="family-number" class="form-control" aria-describedby="passwordHelpInline" required>
-                                              <span id="passwordHelpInline" class="form-text">
-                                                (find on PowerSchool)
-                                              </span>
-                                             
-                                    </div>
-                                    
-                            
-                                    <div class="col">
-                                              <label for="family-phone" class="col-form-label">Phone Number</label>
-                                              <input type="tel" id="family-phone" class="form-control" required>
-                                              
-                                    </div>
-                                  
-
-                                    <div class="col">
-                                              <label for="family-email" class="col-form-label">Email</label>
-                                              <input type="email" id="family-email" class="form-control" required>
-                                              
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                      <div class="col">
-                                              <label for="family-notes" class="col-form-label">Other notes?</label>
-                                              <textarea type="textarea" id="family-notes" class="form-control" rows="4" cols=auto>
-                                              </textarea>
-                                        </div>
-                                    
-                                </div>
-                          </form>
-                          
-
-
-
-
-
-                          </div>
-                          <div class="modal-footer">
-                            <div id="reg-alert-placeholder"></div>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="clearRegistrationOptions()">Cancel</button>
-                            <button type="button" class="btn btn-primary" onclick="getRegFormData()">Submit</button>
-                          </div>
-                  </div>
-                </div>
-            </div>
-        <!-- End of Registration Form Modal -->
-
-           <!-- Staff Sign In Modal -->
-          <div class="modal fade" id="modal3" data-bs-backdrop="static" role="dialog" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-          <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h1 class="modal-title fs-5" >Staff Sign In</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body expandable">
-                <h3>Staff Sign In</h3>
-                  <select class="form-select select-date mt-2 mb-2" aria-label="Default select example" id="class-dates-staff" >
-                    <option selected>Choose a Date</option>
-                  </select>
-                  <br>
-                    <label for="familyName" class="form-label">Family Name Search</label>
-                    <input type="text" class="form-control ms-2 me-2" id="familyName" placeholder="Type last name here" required>
-                  <br>
-                  <div class="container2">
-                    <button type="button" class="btn btn-primary ms-2 me-2" onclick="getData()">Get Family</button>
-                    <button type="button" class="btn btn-danger ms-2 me-2" onclick="clearData()">Clear Output</button>
-                  </div>
-                  <br>
-                  <div id="liveAlertPlaceholder"></div>
-                  <div id="family" class="family">
-
-                  </div>
-                  
-
-              </div>
-              <div class="modal-footer" id="footer1">
-            </div>
-          </div>
+        <div class="modal-footer" id="footer1">
         </div>
-           <!-- Staff Sign In Modal -->
-    
+      </div>
+    </div>
+  </div>
+  <!-- End of Family Sign In Modal -->
+
+  <!-- Family Registration Form Modal -->
+  <div class="modal fade" id="modal4" data-bs-backdrop="static" role="dialog" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="staticBackdropLabel">FamU Family Registration</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+            onclick="clearRegistrationOptions()"></button>
+        </div>
+        <div class="modal-body">
+
+          <div id="ask-adults">
+            <h5><strong>STEP 1:ADULTS</strong></h5>
+            <br>
+            <div id="num-adult-select-placeholder"></div>
+            <select class="form-select" aria-label="Default select example" id="num-adults">
+              <option selected>How many adults from this family will be attending?</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+          <br>
+          <div id="adult-container">
+            <div id="adult-form-placeholder"></div>
+          </div>
+          <div id="ask-students">
+            <h5><strong>STEP 2:STUDENTS</strong></h5>
+            <br>
+            <div id="num-student-select-placeholder"></div>
+            <select class="form-select" aria-label="Default select example" id="num-students">
+              <option selected>How many students from this family will be attending?</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+          <div id="student-container">
+            <div id="student-form-placeholder"></div>
+          </div>
+          <br>
+          <div id="other-info-container"></div>
 
 
-        
-
-        
-
-      
 
 
 
-<!--  IF YOUR MODAL ISN'T SHOWING UP AND YOU JUST SEE A BLANK SCREEN YOU MIGHT BE MISSING A CLOSING DIV TAG. -->
-  
 
-   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+        </div>
+        <div class="modal-footer">
+          <div id="reg-alert-placeholder"></div>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+            onclick="clearRegistrationOptions()">Cancel</button>
+          <button type="button" class="btn btn-primary" id="family-registration-submit"
+            onclick="clientSideRegisterFamily()">Submit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- End of Registration Form Modal -->
+
+  <!-- Staff Sign In Modal -->
+  <div class="modal fade" id="modal3" data-bs-backdrop="static" role="dialog" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5">Staff Sign In</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body expandable">
+          <h3>Staff Sign In</h3>
+          <select class="form-select select-date mt-2 mb-2" aria-label="Default select example" id="class-dates-staff">
+            <option selected>Choose a Date</option>
+          </select>
+          <br>
+          <label for="familyName" class="form-label">Family Name Search</label>
+          <input type="text" class="form-control ms-2 me-2" id="familyName" placeholder="Type last name here" required>
+          <br>
+          <div class="container2">
+            <button type="button" class="btn btn-primary ms-2 me-2" onclick="getData()">Get Family</button>
+            <button type="button" class="btn btn-danger ms-2 me-2" onclick="clearData()">Clear Output</button>
+          </div>
+          <br>
+          <div id="liveAlertPlaceholder"></div>
+          <div id="family" class="family">
+
+          </div>
+
+
+        </div>
+        <div class="modal-footer" id="footer1">
+        </div>
+      </div>
+    </div>
+    <!-- Staff Sign In Modal -->
+
+
+
+
+
+
+
+
+
+
+
+    <!--  IF YOUR MODAL ISN'T SHOWING UP AND YOU JUST SEE A BLANK SCREEN YOU MIGHT BE MISSING A CLOSING DIV TAG. -->
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+      crossorigin="anonymous"></script>
     <?!= include("famu-js");?>
-    
 
-  
-  </body>
+
+
+</body>
+
 </html>
-
-
-
-
-
-
-

@@ -1,28 +1,43 @@
 <!DOCTYPE html>
- <script>
-    
-     function displayData(data){
+<script>
+  const fields = ["family-number", "family-phone", "family-email", "family_notes"]
+  // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // UI FUNCTIONS: Display data from spreadsheet and html on web page
 
-        console.log(data)
-        const div= document.getElementById("family");
 
-        if(data.length===0){
-          console.log("no data")
-          addAlert('liveAlertPlaceholder',"danger","No Family found!");
-          return;
-        }
+  const grades = {
+    "PreK": "PreK",
+    "1": "1st Grade",
+    "2": "2nd Grade",
+    "3": "3rd Grade",
+    "4": "4th Grade",
+    "5": "5th Grade",
+    "MS (6-8)": "MS (6-8)",
+    "HS (9-12)": "HS (9-12)"
+  }
 
-        const formatted = data.map(family => formatFamily(family))
-        div.innerHTML = formatted;
-       try{
-        removeSpinner()
-       } catch(err){
-        return;
-       }
-     } 
-//${family[family.length-1]===""?"":`<div class='card-text ms-2 px-1> Attendance taken ${family[family.length-1]} times today</div>`} 
-      const formatFamily= (family) =>`
-          <div class="card ${family[6]!==""?"bg-warning":""}" style="width:auto;">
+
+
+  function numOptions(type = "num") {
+    if (type === "num") {
+      const arr = [...Array(6).keys()].map(i => i + 1)
+      return arr.map((opt) => `<option value="${opt - 1}" >${opt - 1}</option>`)
+    }
+    return Object.entries(grades).map(([key, value]) => `<option value="${key}" >${value}</option>`)
+
+  }
+
+  function selectElement(className, label, id, element) {
+    const selectOptions = `
+      <select class="${className}" aria-label="${label}" id="${id}">
+        ${numOptions('num')}
+      </select>
+      `;
+    element.innerHTML = selectOptions;
+  }
+
+  const formatFamily = (family) => `
+          <div class="card ${family[6] !== "" ? "bg-warning" : ""}" style="width:auto;">
             <div class="card-body card-container" id="family-${family[0]}">
               <h5 class="card-title ms-2 px-1">${family[1]}</h5>
               <div class="card-text ms-2 px-1 ">${family[0]}</div>
@@ -30,22 +45,12 @@
               <div class="card-text ms-2 px-1 ">Children: ${family[3]}</div>
                
               <select class="form-select ms-2 px-1 form-select-sm select" id="adults-${family[0]}" aria-label="Number of Adults">
-                  <option selected>${family[4]!==""?family[4]:"Number of Adults"}</option>
-                  <option value="0">0</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
+                  <option selected>${family[4] !== "" ? family[4] : "Number of Adults"}</option>
+                  ${numOptions("num")}
               </select>
               <select class="form-select ms-2 px-1 form-select-sm select " id="students-${family[0]}" aria-label="Number of Students">
-                  <option selected>${family[5]!==""?family[5]:"Number of Students"}</option>
-                  <option value="0">0</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
+                  <option selected>${family[5] !== "" ? family[5] : "Number of Students"}</option>
+                  ${numOptions("num")}
               </select>
               <button type="button" class="px-1 btn btn-primary ms-1 px-1 submit-button" id="button-${family[0]}">Submit</button>
               <button type="button" class="px-1 btn btn-danger ms-2 px-1 submit-button" id="button-${family[0]}-inactive">Mark Inactive</button>
@@ -53,336 +58,9 @@
           </div>
       `;
 
-      const familySelect = (event)=> {
-          
-          const id = event.target.parentElement.id;
-          console.log(id)
-          const familyNum = id.split('-')[1];
-          
-         
-          const adults =document.getElementById(`adults-${familyNum}`).value;
-          const students =document.getElementById(`students-${familyNum}`).value;
-          const date = document.getElementById('class-dates-main').value;
-          console.log(adults)
-          console.log(students)
-          console.log(date)
-      
-          addSpinner()
-          google.script.run.withSuccessHandler(addAlert('liveAlertPlaceholder',"success",'Family signed in!')).markAttendance(familyNum,adults,students,date)
-         //google.script.run.markAttendance(familyNum,numAdults,numStudents)
-         
-         }
-    
-    function markInactive(num){
-          google.script.run.serverSideMarkInactive(num);
-    }
 
-     function getData(){
-        addSpinner();
-        const value = document.getElementById('familyName').value;
-        const date = document.getElementById('class-dates-main').value;
-        console.log(value)
-        console.log(date)
-        if(value === '' || date === 'Select a date'){
-              addAlert('liveAlertPlaceholder',"danger","You have to enter a name and date!");
-              return;
-        }
-        
-        google.script.run.withSuccessHandler(displayData).getFamily(value,date);
-        document.getElementById(`familyName`).value="";
-        
-     }
-    
-
-    const element = document.getElementById("family");
-
-    element.addEventListener("click",(event)=>{
-      const target = event.target.id;
-      //console.log(`Target is ${target}`)
-      const num = target.split('-')[1]
-      const test = `button-${num}`
-      const date = document.getElementById('class-dates-main').value;
-      const inactive = `button-${num}-inactive`;
-     // console.log(`Test is ${test}`)
-        if(target===test){
-          familySelect(event)
-          }
-
-        if(target===inactive){
-            markInactive(num,date)
-        }
-      })
-    
-    
-
-      function removeSpinner(){
-        const spinnEl = document.getElementById('loading')
-        console.log(spinnEl)
-        spinnEl.remove()
-        console.log("The function that removes the spinner has run")
-     }
-
-      function addSpinner(id="family"){
-        const element = document.getElementById(id);
-        element.innerHTML =
-             ` <div id="loading" class="loading pt-40">
-                <div class="d-flex justify-content-center"  >
-                  <div>
-                  
-                      <div class="spinner-border" role="status" style="width: 4rem; height: 4rem;">
-                        <span class="visually-hidden">Loading...</span> 
-                      </div>
-                      <div>Loading... </div>
-                    </div>
-                  </div>
-                </div> 
-          `;
-        
-     }
-
-
-   
-
-    function displayClasses(data){
-        const div= document.getElementById("class-attendance");
-        console.log(data)
-    
-        const options = data.map(course => showOptions(course))
-        div.innerHTML = options;
-        //removeSpinner()
-    }
-
-    function getClassData(){
-        
-        const type = document.getElementById('adults-or-students').value;
-       // console.log(type)
-        google.script.run.withSuccessHandler(displayClasses).getSheets(type);
-     }
-
-     function getDates(){
-      clearNames()
-        // const id = event.target.id;
-        // console.log(id)
-        console.log("getDates function has run")
-        google.script.run.withSuccessHandler(displayDates).serverSideGetClassDates();
-     }
-
-    function displayNames(data){
-        const button = document.getElementById("class-submit-button").disabled=false;
-        const div= document.getElementById("name-list");
-        //console.log(data)
-        const options = data.map(family => nameOptions(family))
-        div.innerHTML = options;
-        //removeSpinner()
-    }
-
-    function getStudentsInClass(event){
-        const course = event.target.value;
-        const type = document.getElementById('adults-or-students').value;
-        google.script.run.withSuccessHandler(displayNames).getStudents(course,type);
-     }
-
-  
-    function changeAttendanceColor(event){
-        const selection = event.target.id;
-        const num = selection.split("-")[1]
-        console.log(selection)
-        const element = document.getElementById(selection)
-        console.log(element)
-
-        const value = element.value;
-        console.log(value)
-        let totalElement = document.getElementById(`outer-${num}`)
-        if(value === 'ABS'){
-   
-          totalElement.classList.remove('present')
-          totalElement.classList.add("absent")
-        } else {
-          totalElement.classList.remove('absent')
-          totalElement.classList.add("present")
-        }
-    }
-     
-      const nameOptions= (name) =>`
-          <div class="card present" style="width:auto;" id="outer-${name[2]}">
-            <div class="card-body card-container" id="family-${name[2]}">
-              <h5 class="card-title ms-3 px-2">${name[0]}</h5>
-              <div class="card-text ms-3 px-2 ">${name[1]}</div>
-              <div class="card-text ms-3 px-2 ">${name[2]}</div>
-              <select class="form-select ms-3 px-2 form-select-sm select" id="adults-${name[2]}" aria-label="Number of Adults" onchange="changeAttendanceColor(event)">
-                  <option selected value="X">Present</option>
-                  <option value="ABS">Absent</option>
-              </select>
-            </div>
-          </div>
-      `;
-    function displayDates(data){
-        console.log("Display dates function has run")
-        const disabled = document.getElementById("class-submit-button");
-        disabled.disabled=true;
-        const div= document.getElementById("class-dates");
-        const otherDiv = document.getElementById("class-dates-main")
-        const options = data.map(date => showOptions(date))
-        //console.log(options)
-        div.innerHTML = options;
-        otherDiv.innerHTML = options;
-    
-        //removeSpinner()
-    }
-
-   
-      const showOptions= (opt) =>`
-         <option value="${opt}">${opt}</option>
-      `;
-
-
-      function submitAttendance(){
-        const type = document.getElementById('adults-or-students').value;
-        const date = document.getElementById('class-dates').value;
-        console.log(date)
-        const course = document.getElementById('class-attendance').value;
-        console.log(course)
-        const children = document.getElementById('name-list').children;
-        // let childNodes = parent.childNodes;
-        
-        if(course === "Select a class"){
-          console.log("Wrong class selection")
-          addAlert("class-alert-placeholder","danger","You need to select a class!")
-          clearData('name-list')
-          return;
-        }
-
-
-        const attendance = []
-        for(let child of children){
-          let row = []
-          let family = child.children[0].id;
-          let id = family.split('-')[1];
-          row.push(id)
-          row.push(child.children[0].children[3].value)
-          //console.log(row)
-          attendance.push(row)
-        }
-
-       // console.log(attendance)
-        //console.log(element)
-        const filteredAttendance = attendance.filter(row =>row[0]!=='')
-       // console.log(filteredAttendance)
-
-        google.script.run.withSuccessHandler(afterSubmit).markClassAttendance(course,filteredAttendance,date,type)
-       
-        
-      }
-
-      function addAlert(id,type,statement){
-          if(document.getElementById('loading') !== null){
-            "The spinner was not null"
-            removeSpinner()
-            console.log("Spinner removed")
-          }
-          clearData()
-          const placeholder = document.getElementById(id)
-          const wrapper = document.createElement('div')
-          wrapper.innerHTML = [
-              `
-              <br>
-              <div class="alert alert-${type} alert-dismissible" role="alert" id="alert">`,
-              `   <div>${statement}</div>`,
-              '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
-              '</div>'
-            ].join('')
-            placeholder.append(wrapper)
-            setTimeout(()=>{
-            const element = document.getElementById("alert");
-            element.remove();
-          
-          },3000)
-      }
-
-        function clearNames(){
-             document.getElementById('class-dates').value='';
-          document.getElementById('class-attendance').value='';
-          document.getElementById('adults-or-students').value='';
-          const div = document.getElementById('name-list');
-          while(div.firstChild){
-              div.removeChild(div.firstChild)
-            }
-        }
-
-      function afterSubmit(id="modal2"){
-        //console.log(data)
-        const modalEl = document.getElementById(id)
-        const modal = bootstrap.Modal.getInstance(modalEl)
-        //console.log(modal)
-   
-        if(data === "Attendance already taken for that date!"){
-          clearNames()
-          addAlert(`already-taken`,"danger",`Attendance already taken for that date!`)
-          console.log("This code got run")
-          return;
-        }
-        
-          clearNames()
-          modal.hide();
-         
-         if(id==="modal2") addAlert(`attendanceTakenPlaceholder`,"success",`Attendance submitted for ${data}`)
-         if(id==="modal4") {
-          addAlert(`attendanceTakenPlaceholder`,"success",`New family registered!`)
-          clearRegistrationOptions()
-         }
-      }
-
-
-        function openModal(event){
-          const id = event.target.id; 
-          const modals = {
-              "modal-class-attendance":"modal2",
-              "modal-family-signin" :"modal1",
-              "modal-family-signup" :"modal4",
-          }
-
-          const modalId = modals[id]
-          console.log(modalId)
-          const modalElement = document.getElementById(modalId)
-          console.log(modalElement)
-          const modal = bootstrap.Modal.getInstance(modalElement)
-          console.log(modal)
-          
-          modal.show()
-          getDates()
-         
-        }
-
-      function clearData(id="family"){
-        console.log("clearData function has been run")
-    
-        const element = document.getElementById(id);
-        
-        while(element.firstChild){
-            
-              element.removeChild(element.firstChild)
-        }
-
-      }
-
-        
-
-      function copyToClipboard(event){
-        const topDiv = event.target.parentElement;
-        const first = topDiv.children[0].children[1].value;
-        const last = topDiv.children[1].children[1].value;
-        const str = `${last}, ${first}`;
-        const el = document.createElement('textarea');
-        el.value = str;
-
-        console.log(el.value)
-
-        navigator.clipboard.writeText(str)
-        addAlert("copied-alert-placeholder","success","Name copied to clipboard")
-      }
-
-      const formHtml = (classes,id,num,type) => `
-         <div class="form-control mb-1 mt-1 ${num%2===0?"bg-dark-subtle":"bg-body-secondary"}" id="famu-reg-form-${id}">
+  const formHtml = (classes, id, num, type) => `
+         <div class="form-control mb-1 mt-1 ${num % 2 === 0 ? "bg-dark-subtle" : "bg-body-secondary"}" id="famu-reg-form-${id}">
          <button id="remove-peep" type="button" class="btn-close" aria-label="Close" onclick="removePerson(event)"></button>
          <div id="name-container" class="row">
              <div id="first" class="mb-2 col">
@@ -393,7 +71,7 @@
                   <label for="last-name-box">Last Name</label>
                   <input id="${type}-last-name-box-${num}" type="text" class="form-control">
              </div>
-             ${type==="student"?`<button type="button" class="btn btn-info col col-lg-2 me-2 mb-2 mt-2" onclick="copyToClipboard(event)" class="btn btn-primary">Copy name to clipboard</button>`:''}
+             ${type === "student" ? `<button type="button" class="btn btn-info col col-lg-2 me-2 mb-2 mt-2" onclick="copyToClipboard(event)" class="btn btn-primary">Copy name to clipboard</button>` : ''}
              <div id="copied-alert-placeholder"></div>
           </div>
 
@@ -401,20 +79,19 @@
              <div id="class1" class="mb-2 col">
                   <label for="class1-select">Session 1 Class</label>
                   <select id="${type}-class1-select-${num}" class="form-select">
-                  ${type==="student"?classes[0]:classes}
+                  ${type === "student" ? classes[0] : classes}
                   </select>
              </div>
              <div id="class2" class="mb-2 col">
                   <label for="class2-select">Session 2 Class</label>
                   <select id="${type}-class2-select-${num}" class="form-select">
-                  ${type==="student"?classes[1]:classes}
+                  ${type === "student" ? classes[1] : classes}
                   </select>
              </div>
           </div>
            
 
-             ${
-              type==="student"?`
+             ${type === "student" ? `
               <div id="student-container" class="row">
                   <div id="student-number" class="col">
                       <label for="last-name-box">Student Number</label>
@@ -423,192 +100,677 @@
                   <div id="grade-level" class="col">
                       <label for="last-name-box">Grade Level</label>
                       <select id="grade-level-${num}" type="number" class="form-select">
-                            <option value="PreK">Prek</option>
-                            <option value="Kinder">Kinder</option>
-                            <option value="1"> 1st Grade </option>
-                            <option value="2"> 2nd Grade </option>
-                            <option value="3"> 3rd Grade </option>
-                            <option value="4"> 4th Grade </option>
-                            <option value="5"> 5th Grade </option>
-                            <option value="MS (6-8)">MS (6-8)</option>
-                            <option value="HS (9-12)">HS (9-12)</option>
+                        ${numOptions("grades")}
                       </select>
                   </div>
                </div>
-              `:""
-             }
+              `: ""
+    }
               
-            
-
           </div>
       `;
-    
-      function displayForm(courses){
-        const session1 = courses["session1"];
-        const session2 = courses["session2"];
-        const id = courses["id"];
-        const type = id.split('-')[0];
-        console.log(type)
-
-        const number = courses["number"];
-        let classesHtml;
-        if(type==="student"){
-            classesHtml = [session1.map(course => showOptions(course)),session2.map(course => showOptions(course))]
-        }
-
-        if(type==="adult"){
-            classesHtml = [courses["adults"].map(course => showOptions(course))];
-        }
-    
-       
-        console.log(number)
-        const parent = document.getElementById(id);
-       // const formContainer = document.createElement(`form-container-${id}`)
-       // const formNode = document.createTextNode(formHtml(classesHtml))
-        for (let x=0; x<number; x++){
-           parent.insertAdjacentHTML("afterend",formHtml(classesHtml,`${id}-${x}`,x,type))
-          // formContainer.appendChild(formNode)
-           console.log("element inserted")
-        }
-        
-       removeSpinner()
-      }
 
 
-      function personForm(e){
-        const number = e.target.value;
-        const id = e.target.id;
-        console.log(`Number selected: ${number}`);
-
-        const select = {
-          "num-students":["students","student-form-placeholder"],
-          "num-adults":["adults","adult-form-placeholder"]
-        };
-        
-        const ssVal = select[id][0];
-        //console.log(ssVal)
-        const elId = select[id][1];
-        //console.log(elId)
-        
-        const courses = google.script.run.withSuccessHandler(displayForm).getServerSideGetClassLists(ssVal,elId,number);
-        addSpinner(elId)
-       
-      }
+  const nameOptions = (name) => `
+          <div class="card not-taken" style="width:auto;" id="outer-${name[0]}">
+            <div class="card-body card-container" id="family-${name[2]}">
+              <h5 class="card-title ms-3 px-2">  FamU Id: ${name[0]}</h5>
+              <div class="card-text ms-3 px-2 "> Last: ${name[1]}</div>
+              <div class="card-text ms-3 px-2 "> First: ${name[2]}</div>
+              <select class="form-select ms-3 px-2 form-select-sm select" id="adults-${name[0]}" onchange="changeAttendanceColor(event)">
+                  ${classAttendanceOptions([name[5]])}
+              </select>
+            </div>
+          </div>
+      `;
 
 
-      function clearRegistrationOptions(){
-        document.getElementById('num-adults').value='';
-        document.getElementById('num-students').value='';
-        clearData('adult-container')
-        clearData('student-container')
-        
-        const adultContainer = document.getElementById("adult-container");
-        const adultPlaceholder = document.createElement("div")
-        adultPlaceholder.id = "adult-form-placeholder";
-        adultContainer.appendChild(adultPlaceholder)
+  function classAttendanceOptions(value) {
+    const options = {
+      '': ['selected', '', ''],
+      "X": ['', '', 'selected'],
+      "ABS": ['', 'selected', '']
+    }
+
+    const htmlToReturn =
+      ` <option ${options[value][0]} value="">Not taken</option>
+       <option ${options[value][1]} value="ABS">Absent</option>
+       <option ${options[value][2]} value="X">Present</option>`
+
+    return htmlToReturn;
+  }
+
+  const familyFields = {
+    "number": ["Family Number", "text"],
+    "phone": ["Phone Number", "tel"],
+    "email": ["Email", "email"],
+    "notes": ["Notes", "text"]
+  }
+
+  function familyFieldGenerator() {
+
+    const fields = Object.entries(familyFields).map(([key, value]) => ` <div class="col">
+                <label for="family-${key}" class="col-form-label">${value[0]}</label>
+                <input type="${value[1]}" id="family-${key}" class="form-control" required>
+              </div> \n`);
+
+    return fields;
+
+  }
+
+  const otherInfoForm = () =>
+    ` <h5><strong>STEP 3:CONTACT INFO</strong></h5>
+          <br>
+          <div id="other-info" class="form-control container text-center row w-auto">
+            <div class="row">
+             ${familyFieldGenerator().slice(0, 3).join().replace(/,/g, " ")}
+            </div>
+
+            <div class="row">
+              ${familyFieldGenerator().slice(-1).join().replace(/,/g, " ")} 
+
+            </div>
+          </div>`;
+
+  const showOptions = (opt) => `
+         <option value="${opt}">${opt}</option>
+      `;
 
 
-        const studentContainer = document.getElementById("student-container");
-        const studentPlaceholder = document.createElement("div")
-        studentPlaceholder.id = "student-form-placeholder";
-        studentContainer.appendChild(studentPlaceholder)
-
-        document.getElementById("family-number").value=""
-        document.getElementById("family-phone").value=""
-        document.getElementById("family-email").value=""
-        document.getElementById("family-notes").value=""
+  function renderData(data, htmlTemp) {
+    return data.map(row => htmlTemp(row))
+  }
 
 
-        console.log("clearRegistrationOptions function has run")
-      }
-     
+  function displayClasses(data) {
+    const div = getElement("class-attendance");
+    const session = getValue('first-or-second')
+    let list;
+    console.log('first-or-second')
+    if (session === "Session1") list = data["session1"];
+    if (session === "Session2") list = data["session2"];
+    console.log(list)
+    const options = renderData(list, showOptions)
+    div.innerHTML = options
+
+  }
+
+  function displayNames(data) {
+
+    const button = document.getElementById("class-submit-button").disabled = false;
+    const div = document.getElementById("name-list");
+    //console.log(data)
+    const options = renderData(data, nameOptions)
+    div.innerHTML = options;
+    data.forEach(row => changeColor(row[0], row[5]))
+
+    removeSpinner()
+  }
+
+  function displayFamilies(data) {
+
+    if (data.length === 0) {
+      addAlert('liveAlertPlaceholder', "danger", "No Family found!");
+      return;
+    }
+
+    const formatted = renderData(data, formatFamily)
+    getElement("family").innerHTML = formatted;
+
+    try {
+      removeSpinner()
+    } catch (err) {
+      return;
+    }
+  }
+
+  function displayDates(data) {
+
+    // console.log("Display dates function has run")
+    const disabled = document.getElementById("class-submit-button");
+    disabled.disabled = true;
+    const div = document.getElementById("class-dates");
+    const classBody = getElement('modal-body-class-attendance');
+    const otherDiv = document.getElementById("class-dates-main");
+    const signinBody = getElement('modal-body-family-signin')
+    const options = renderData(data, showOptions)
+    //console.log(options)
+    div.innerHTML = options;
+    otherDiv.innerHTML = options;
+    classBody.style.visibility = "visible"
+    signinBody.style.visibility = "visible"
+    removeSpinner()
+  }
+
+  function displayForm(courses) {
+
+    const session1 = courses["session1"];
+    const session2 = courses["session2"];
+    const id = courses["id"];
+    const type = id.split('-')[0];
+    //console.log(type)
+
+    const number = courses["number"];
+    let classesHtml;
+    if (type === "student") {
+      classesHtml = [session1.map(course => showOptions(course)), session2.map(course => showOptions(course))]
+    }
+
+    if (type === "adult") {
+      classesHtml = [courses["adults"].map(course => showOptions(course))];
+    }
 
 
-      function getRegFormData(){
-          const adults = document.getElementById('adult-container');
-          const adultChildren = adults.children;
+    //console.log(number)
+    const parent = document.getElementById(id);
+    // const formContainer = document.createElement(`form-container-${id}`)
+    // const formNode = document.createTextNode(formHtml(classesHtml))
+    for (let x = 0; x < number; x++) {
+      parent.insertAdjacentHTML("afterend", formHtml(classesHtml, `${id}-${x}`, x, type))
+      // formContainer.appendChild(formNode)
+      //console.log("element inserted")
+    }
 
-          const students = document.getElementById('student-container');
-          const studentChildren = students.children;
-          const familyVals = []
+    removeSpinner()
+  }
 
-          for (let child of adultChildren){
-            if(child.id !=='adult-form-placeholder'){
-              const first = child.children[1].children[0].children[1].value;
-              const last = child.children[1].children[1].children[1].value;
-              const class1 = child.children[2].children[0].children[1].value;
-              const class2 = child.children[2].children[1].children[1].value;
-              const person = [first,last,class1,class2,"no student number","parent"]
-              for( let val of person){
-                if(val===""){
-                  addAlert("reg-alert-placeholder","danger","All adults fields must be entered!")
-                  return;
-                }
-              }
-              familyVals.push(person)
-            }
-          }
-       
 
-          for (let child of studentChildren){
-            if(child.id !=='student-form-placeholder'){
-              const first = child.children[1].children[0].children[1].value;
-              const last = child.children[1].children[1].children[1].value;
-              const class1 = child.children[2].children[0].children[1].value;
-              const class2 = child.children[2].children[1].children[1].value;
-              const studentNumber = child.children[3].children[0].children[1].value;
-              const gradeLevel = child.children[3].children[1].children[1].value;
-              const person = [first,last,class1,class2,studentNumber,gradeLevel];
-              for( let val of person){
-                if(val===""){
-                  addAlert("reg-alert-placeholder","danger","All student fields must be entered!")
-                  return;
-                }
-              }
-              familyVals.push(person)
-            }
-          }
-          
-          if(familyVals.length < 2){
-              addAlert("reg-alert-placeholder","danger","Must have at least one adult and one student!")
-              return;
-          }
 
-          const number = document.getElementById("family-number").value;
-          if(!number) {
-            addAlert("reg-alert-placeholder","danger","Must include valid family number!")
+
+  // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // DATA FUNCTIONS: all methods for performing CRUD operations on the spreadsheet
+
+
+
+
+  function clientSideRegisterFamily() {
+    const adults = getElement('adult-container').children;
+    const students = getElement('student-container').children;
+    const familyVals = []
+
+    for (let child of adults) {
+      if (child.id !== 'adult-form-placeholder') {
+        const first = child.children[1].children[0].children[1].value;
+        const last = child.children[1].children[1].children[1].value;
+        const class1 = child.children[2].children[0].children[1].value;
+        const class2 = child.children[2].children[1].children[1].value;
+        const person = [first, last, class1, class2, "no student number", "parent"]
+        for (let val of person) {
+          if (val === "") {
+            addAlert("reg-alert-placeholder", "danger", "All adults fields must be entered!")
             return;
           }
-          const email = document.getElementById("family-email").value;
-          if(!email) {
-            addAlert("reg-alert-placeholder","danger","Must include valid email!")
-            return;
-          }
-          const phone = document.getElementById("family-phone").value;
-          if(!phone) {
-            addAlert("reg-alert-placeholder","danger","Must include valid phone number!")
-            return;
-          }
-          const notes = document.getElementById("family-notes").value;
-          
-
-          
-          const finalArr = familyVals.map(row => [number, ...row, email,phone,notes])
-          console.log(finalArr)
-
-          google.script.run.withSuccessHandler(afterSubmit("modal4")).serverSideRegisterFamily(finalArr)
-      }
- 
-
-        function removePerson(event){
-            const id = event.target.parentElement.id;
-            console.log(id)
-            const element = document.getElementById(id);
-            element.remove()
         }
- 
-   </script>
+        familyVals.push(person)
+      }
+    }
+
+
+    for (let child of students) {
+      if (child.id !== 'student-form-placeholder') {
+        const first = child.children[1].children[0].children[1].value;
+        const last = child.children[1].children[1].children[1].value;
+        const class1 = child.children[2].children[0].children[1].value;
+        const class2 = child.children[2].children[1].children[1].value;
+        const studentNumber = child.children[3].children[0].children[1].value;
+        const gradeLevel = child.children[3].children[1].children[1].value;
+        const person = [first, last, class1, class2, studentNumber, gradeLevel];
+        for (let val of person) {
+          if (val === "") {
+            addAlert("reg-alert-placeholder", "danger", "All student fields must be entered!")
+            return;
+          }
+        }
+        familyVals.push(person)
+      }
+    }
+
+    if (familyVals.length < 2) {
+      addAlert("reg-alert-placeholder", "danger", "Must have at least one adult and one student!")
+      return;
+    }
+
+    const fields = ["family-number", "family-phone", "family-email", "family-notes"]
+    const warnings = ["Must have at least one adult and one student!", "Must include valid family number!", "Must include valid email!", "Must include valid phone number!"]
+
+    //console.log(document.getElementById(fields[3]).value)
+
+    const fieldVals = singleGetFunVals(...fields)
+    fieldVals.forEach((fieldVal, index) => {
+      if (!fieldVal) addAlert("reg-alert-placeholder", "danger", warnings[index])
+    });
+
+    const finalArr = familyVals.map(row => [fieldVals[0], ...row, fieldVals[2], fieldVals[1], fieldVals[3]])
+    console.log(finalArr)
+
+    google.script.run.withSuccessHandler(afterSubmit("modal4")).serverSideRegisterFamily(finalArr)
+  }
+
+
+
+  function submitAttendance() {
+    const fields = ['adults-or-students', 'class-dates', 'class-attendance', 'first-or-second']
+    const children = getElement('name-list').children;
+    let childNodes = parent.childNodes;
+
+    const vals = singleGetFunVals(...fields)
+
+    if (vals[2] === "Select a class") {
+      console.log("Wrong class selection")
+      addAlert("class-alert-placeholder", "danger", "You need to select a class!")
+      clearData('name-list')
+      return;
+    }
+
+
+    const attendance = []
+    for (let child of children) {
+      let row = []
+      let family = child.children[0].id;
+      let id = family.split('-')[1];
+      row.push(id)
+      row.push(child.children[0].children[3].value)
+      //console.log(row)
+      attendance.push(row)
+    }
+
+    // console.log(attendance)
+    //console.log(element)
+    const filteredAttendance = attendance.filter(row => row[0] !== '')
+    console.log(filteredAttendance)
+
+    google.script.run.withSuccessHandler(afterSubmit("modal2")).markClassAttendance(vals[2], filteredAttendance, vals[1], vals[0], vals[3])
+
+
+  }
 
 
 
 
+
+  // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  // UTILITY FUNCTIONS
+
+  function removeSpinner() {
+    getElement('loading').remove()
+  }
+
+  function addSpinner(id = "family") {
+    console.log("The spinner function has run")
+    getElement(id).innerHTML =
+      ` <div id = "loading" class= "loading pt-40">
+    <div class="d-flex justify-content-center">
+      <div>
+
+         <div class="spinner-border" role="status" style="width: 4rem; height: 4rem;">
+          <span class="visually-hidden">Loading...</span>
+         </div>
+         <div>Loading... </div>
+      </div>
+    </div>
+                    </div>
+      `;
+
+  }
+
+  function addAlert(id, type, statement) {
+    if (document.getElementById('loading') !== null) {
+      "The spinner was not null"
+      removeSpinner()
+    }
+
+    // clearData()
+    const placeholder = getElement(id)
+    const wrapper = document.createElement('div')
+    wrapper.innerHTML = [
+      `
+      <div class="alert alert-${type} alert-dismissible" role="alert" id="alert">`,
+      `   <div>${statement}</div>`,
+      '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+      '</div>'
+    ].join('')
+    placeholder.append(wrapper)
+    setTimeout(() => {
+      getElement("alert").remove();
+    }, 3000)
+  }
+
+  function getFuncVals(...args) {
+    return args[0].map(arg => document.getElementById(arg).value);
+  }
+
+
+  // adding .value makes them null
+  function singleGetFunVals(...args) {
+    console.log(args);
+    return args.map(arg => document.getElementById(arg).value);
+  }
+
+  function getValue(id) {
+    return document.getElementById(id).value;
+  }
+
+  function getElement(id) {
+    return document.getElementById(id)
+  }
+
+  function removePerson(event) {
+    getElement(event.target.parentElement.id).remove()
+  }
+
+  function clearFields(...ids) {
+    console.log(ids)
+    ids.forEach(id => {
+      if (id) getElement(id).value = ""
+    })
+  }
+
+
+  // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  //CONTROL COMPONENT
+  //class controller, init method, all event listeners
+  // class Controller {
+
+
+
+  const funcVals = {
+    "families": ["familyName", "familyNumber", "class-dates-main"],
+    "courses": ["adults-or-students", "first-or-second", "class-dates"],
+    "students": ["adults-or-students"],
+    "dates": []
+  }
+
+  function clientSideGetFamilies() {
+    addSpinner();
+
+    const vals = getFuncVals(funcVals["families"])
+
+
+    if (vals[2] === 'Select a date' || (vals[0] === '' && vals[1] === '')) {
+      addAlert('liveAlertPlaceholder', "danger", "You have to enter a date and either a name or number!");
+      return;
+    }
+
+    if (vals[0] !== '' && vals[1] === '') {
+      google.script.run.withSuccessHandler(displayFamilies).serverSideGetFamily(vals[0], vals[2])
+      getElement(`familyName`).value = "";
+    }
+
+    if (vals[0] === '' && vals[1] !== '') {
+      google.script.run.withSuccessHandler(displayFamilies).serverSideGetFamilyByNumber(vals[1], vals[2])
+      getElement(`familyNumber`).value = "";
+    }
+
+  }
+  function clientSideGetDates() {
+
+    clearNames()
+    google.script.run.withSuccessHandler(displayDates).serverSideGetClassDates()
+  }
+
+  function getClassData() {
+    console.log("getClassData has run")
+    google.script.run.withSuccessHandler(displayClasses).getServerSideGetClassLists(getValue(funcVals["courses"][0]), funcVals['courses'][0], getValue(funcVals['courses'][2]));
+  }
+
+  function getStudentsInClass(event) {
+    addSpinner('class-attendance-spinner')
+    const course = event.target.value;
+    google.script.run.withSuccessHandler(displayNames).getStudents(course, getValue(funcVals["courses"][1]), getValue(funcVals['courses'][2]));
+  }
+
+
+
+  document.getElementById("modal-family-signin").addEventListener('click', clientSideGetDates);
+  document.getElementById("find-family-button").addEventListener('click', clientSideGetFamilies);
+  document.getElementById("family").addEventListener("click", familySignInOptions);
+  document.getElementById("modal-class-attendance").addEventListener("click", modalOpener)
+  document.getElementById("modal-family-signin").addEventListener("click", modalOpener)
+  document.getElementById("modal-family-signup").addEventListener("click", modalOpener)
+  document.getElementById('num-adults').addEventListener('change', personFormRunner)
+  document.getElementById('num-students').addEventListener('change', personFormRunner)
+  document.getElementById('modal-class-attendance').addEventListener('click', clientSideGetDates)
+
+
+  document.getElementById('first-or-second').addEventListener('change', getClassData)
+  document.getElementById('class-attendance').addEventListener('change', getStudentsInClass)
+
+
+
+
+  function modalOpener() {
+    getElement('other-info-container').innerHTML = otherInfoForm()
+    openModal(event)
+  }
+
+  function personFormRunner() {
+
+    personForm(event)
+  }
+
+  function clearClassNames() {
+    clearData('clear-students-button')
+  }
+
+  function clearFamilyNames() {
+    clearData('clear-families-button')
+  }
+
+
+  function familySelect(num) {
+
+    const adults = document.getElementById(`adults-${num}`).value;
+    const students = document.getElementById(`students-${num}`).value;
+
+    addSpinner()
+    google.script.run.withSuccessHandler(addAlert('liveAlertPlaceholder', "success", 'Family signed in!')).markAttendance(num, adults, students, getValue(funcVals["families"][2]))
+
+  }
+
+
+
+  function familySignInOptions(event) {
+    const target = event.target.id;
+    const num = target.split('-')[1]
+    const test = `button-${num}`
+    const date = getValue('class-dates-main');
+    const inactive = `button-${num}-inactive`;
+    // console.log(`Test is ${test}`)
+    if (target === test) {
+      familySelect(num)
+    }
+
+    if (target === inactive) {
+      markInactive(num, date)
+    }
+  }
+
+
+
+
+  function markInactive(num) {
+    google.script.run.serverSideMarkInactive(num);
+  }
+
+
+
+  function changeAttendanceColor(event) {
+    const selection = event.target.id;
+    const num = selection.split("-")[1]
+    console.log(selection)
+    console.log(num)
+    const element = document.getElementById(selection)
+    console.log(element)
+
+    const value = element.value;
+    console.log(value)
+    changeColor(num, value)
+
+  }
+
+  function changeColor(num, value) {
+    let totalElement = document.getElementById(`outer-${num}`)
+    if (value === 'ABS') {
+      totalElement.classList.remove('not-taken')
+      totalElement.classList.remove('present')
+      totalElement.classList.add("absent")
+    }
+    if (value === 'X' || value === 'x') {
+      totalElement.classList.remove('not-taken')
+      totalElement.classList.remove('absent')
+      totalElement.classList.add("present")
+    }
+
+    if (value === '') {
+      totalElement.classList.remove('present')
+      totalElement.classList.remove('absent')
+      totalElement.classList.add("not-taken")
+
+    }
+  }
+
+  function clearNames() {
+    clearFields('class-dates', 'class-attendance', 'adults-or-students')
+    const div = getElement('name-list');
+    while (div.firstChild) {
+      div.removeChild(div.firstChild)
+    }
+  }
+
+  function afterSubmit(id = "modal2") {
+    //console.log(data)
+    const modalEl = getElement(id)
+    const modal = bootstrap.Modal.getInstance(modalEl)
+    //console.log(modal)
+
+    // if (data === "Attendance already taken for that date!") {
+    //   clearNames()
+    //   addAlert(`already-taken`, "danger", `Attendance already taken for that date!`)
+    //   //console.log("This code got run")
+    //   return;
+    // }
+
+    clearNames()
+    modal.hide();
+
+    if (id === "modal2") addAlert(`attendanceTakenPlaceholder`, "success", `Class attendance taken!`)
+    if (id === "modal4") {
+      addAlert(`attendanceTakenPlaceholder`, "success", `New family registered!`)
+      clearRegistrationOptions()
+    }
+  }
+
+
+  function openModal(event) {
+    const id = event.target.id;
+    const modals = {
+      "modal-class-attendance": ["modal2", "class-dates-spinner", 'modal-body-class-attendance'],
+      "modal-family-signin": ["modal1", "class-dates-main-spinner", 'modal-body-family-signin'],
+      "modal-family-signup": ["modal4", '', '']
+    }
+
+    const modalId = modals[id][0];
+    const spinner = modals[id][1];
+    if (spinner) {
+      getElement(modals[id][2]).style.visibility = "hidden"
+      addSpinner(spinner)
+    }
+    //console.log(modalId)
+    const modalElement = document.getElementById(modalId)
+    //console.log(modalElement)
+    const modal = bootstrap.Modal.getInstance(modalElement)
+    //console.log(modal)
+
+    modal.show()
+
+  }
+
+  function clearData(id) {
+    //const id = event.target.id;
+    const options = {
+      'clear-students-button': 'name-list',
+      'clear-families-button': 'family',
+      'name-list': 'name-list',
+      'student-container': 'student-container',
+      'adult-container': 'adult-container'
+    }
+    console.log("clearData function has been run")
+
+    const element = document.getElementById(options[id]);
+
+    while (element.firstChild) {
+
+      element.removeChild(element.firstChild)
+    }
+
+  }
+
+
+
+  function copyToClipboard(event) {
+    const topDiv = event.target.parentElement;
+    const first = topDiv.children[0].children[1].value;
+    const last = topDiv.children[1].children[1].value;
+    const str = `${last}, ${first}`;
+    const el = document.createElement('textarea');
+    el.value = str;
+
+    console.log(el.value)
+
+    navigator.clipboard.writeText(str)
+    addAlert("copied-alert-placeholder", "success", "Name copied to clipboard")
+  }
+
+
+
+
+
+  function personForm(e) {
+
+    const number = e.target.value;
+    const id = e.target.id;
+    console.log(`Number selected: ${number}`);
+
+    const select = {
+      "num-students": ["students", "student-form-placeholder"],
+      "num-adults": ["adults", "adult-form-placeholder"]
+    };
+
+    const ssVal = select[id][0];
+    //console.log(ssVal)
+    const elId = select[id][1];
+    //console.log(elId)
+
+    const courses = google.script.run.withSuccessHandler(displayForm).getServerSideGetClassLists(ssVal, elId, number);
+    addSpinner(elId)
+
+  }
+
+
+  function clearRegistrationOptions() {
+
+    const containers = ["adult-container", "student-container"];
+    const fields = ["family-number", "family-phone", "family-email", "family-notes"]
+    const numFields = ["num-adults", "num-students"]
+
+    containers.forEach(container => clearData(container))
+    clearFields(...numFields)
+
+    containers.forEach(container => {
+      const containerType = getElement(container);
+      const placeholder = document.createElement("div")
+      const type = container.split('-')[0]
+      placeholder.id = `${type}-form-placeholder`;
+      containerType.appendChild(placeholder)
+    })
+
+    clearFields(...fields)
+
+
+    console.log("clearRegistrationOptions function has run")
+  }
+
+
+</script>
