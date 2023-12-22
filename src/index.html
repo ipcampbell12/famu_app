@@ -20,7 +20,7 @@
         <div class="container2">
           <img class="ms-2 me-2" src="https://lh3.google.com/u/0/d/1g-NtWP9uygARXCU1xDQnekfGTWilNEAS" width="50px"
             height="auto">
-          <h1>TEST FamU Attendance Manager</h1>
+          <h1>FamU Attendance Manager</h1>
           <img class="ms-2 me-2" src="https://lh3.google.com/u/0/d/1g-NtWP9uygARXCU1xDQnekfGTWilNEAS" width="50px"
             height="auto">
         </div>
@@ -42,6 +42,8 @@
             data-bs-toggle="modal" data-bs-target="#modal4">
             Register Family for FamU
           </button>
+          <a href="<?= getSsUrl() ;?>" target="_blank" class="btn btn-secondary ms-5 me-5 mt-5 mb-5 btn-lg">Go To
+            Spreadsheet</a>
         </div>
 
 
@@ -80,6 +82,7 @@
               <option selected>Which session?</option>
               <option value="Session1">Session 1</option>
               <option value="Session2">Session 2</option>
+              <option value="noSesh">Same both sessions (PreK, Kinder, or Teen)</option>
             </select>
             <br>
             <select class="form-select select-class mt-2 mb-2" aria-label="Default select example"
@@ -91,9 +94,16 @@
             <h5>Names</h5>
             <div id="class-attendance-spinner"></div>
             <div id="name-placeholder">
-              <button type="button" class="btn btn-danger ms-2 me-2" id="clear-students-button"
-                onclick="clearClassNames()">Clear Output</button>
-              <ul id="name-list">
+              <div id="buttons-div" class="col">
+                <button type="button" class="btn btn-info ms-2 me-2 mt-2 mb-2 row" id="clear-students-button"
+                  onclick="clearClassNames()">Clear Output</button>
+                <button type="button" class="btn btn-success ms-2 me-2 mt-2 mb-2 row" id="all-present"
+                  onclick="markPresent()">Mark All Present</button>
+                <button type="button" class="btn btn-danger ms-2 me-2 mt-2 mb-2 row" id="all-absent"
+                  onclick="markAbsent()">Mark All Absent</button>
+              </div>
+
+              <ul id="name-list" class="card-list">
 
 
               </ul>
@@ -121,7 +131,8 @@
       <div class="modal-content">
         <div class="modal-header">
           <h1 class="modal-title fs-5">Main Family Sign In</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-family-signin"
+            onclick="clearFamilyModalNames()"></button>
         </div>
         <div id="class-dates-main-spinner"></div>
         <div class="modal-body expandable" id="modal-body-family-signin">

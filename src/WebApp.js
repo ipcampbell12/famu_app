@@ -14,9 +14,15 @@ function doGet(e) {
 //phone numbers and time stamps (any number really) will throw off text finder and potentially return the wrong row
 function getSs() {
   const app = SpreadsheetApp;
-  // const ss = app.openByUrl('https://docs.google.com/spreadsheets/d/1tFyd--6hlnCPqmuM6Tdi2LAljiURnocXSJ3ECPu-lqg/edit#gid=1829392235');
-  const ss = app.openByUrl('https://docs.google.com/spreadsheets/d/12avH5SfqHnYYBIj6DCxfgl5KIRH-25-K6k-mlfcRYfw/edit#gid=1829392235');
+  const ss = app.openByUrl('https://docs.google.com/spreadsheets/d/1tFyd--6hlnCPqmuM6Tdi2LAljiURnocXSJ3ECPu-lqg/edit#gid=1829392235');
+  //const ss = app.openByUrl('https://docs.google.com/spreadsheets/d/12avH5SfqHnYYBIj6DCxfgl5KIRH-25-K6k-mlfcRYfw/edit#gid=1829392235');
   return ss;
+}
+
+function getSsUrl() {
+  const url = getSs().getUrl();
+  Logger.log(url)
+  return url;
 }
 
 function getSheet(name = "Sign In Sheet") {
@@ -40,7 +46,10 @@ function serverSideGetFamily(name, date) {
   const searchKey = `Number of Adults - ${date}`
   const dateIndex = data[0].indexOf(searchKey)
   Logger.log(dateIndex)
-  const familyData = data.filter(row => row[1].includes(name));
+
+  const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1)
+  Logger.log(capitalizedName)
+  const familyData = data.filter(row => row[1].includes(capitalizedName));
   // Logger.log(family)
   const familyReturnArr = familyData.map(family => [family[0], family[1], family[2], family[3], family[dateIndex], family[dateIndex + 1], family[dateIndex + 2]]);
   Logger.log(familyReturnArr)
@@ -118,9 +127,11 @@ function findFamily(sheet, date, familyNum) {
 function serverSideGetSheets(session) {
   const ss = getSs();
   let sheets;
-  Logger.log(session)
+  Logger.log(`The ssession type passed is ${session}`)
+  if (session === "noSesh") sheets = ss.getSheets().filter(sheet => getNoSesh().includes(sheet.getName())).map(sheet => sheet.getName());
   if (session === "Session1") sheets = ss.getSheets().filter(sheet => sheet.getName().startsWith("S1-")).map(sheet => sheet.getName());
   if (session === "Session2") sheets = ss.getSheets().filter(sheet => sheet.getName().startsWith("S2-")).map(sheet => sheet.getName());
+  Logger.log(sheets)
   return sheets;
   // const sheetList = [...["Select a class"], ...sheets]
   // return sheetList;
@@ -128,9 +139,9 @@ function serverSideGetSheets(session) {
 
 function getStudents(course, session, date) {
   const ss = getSs();
-  Logger.log(course)
+  Logger.log(`The course being passed is ${course}`)
   const sheetName = serverSideGetSheets(session).find(sheet => sheet.includes(course))
-  Logger.log(sheetName)
+  Logger.log(`The sheet we found is ${sheetName}`)
   Logger.log(date)
   const ws = ss.getSheetByName(sheetName);
   const dates = ws.getRange(2, 1, 1, ws.getLastColumn()).getValues()[0].map(dateVal => Utilities.formatDate(new Date(dateVal), "GMT", "MM/dd/yyyy"));
@@ -174,10 +185,10 @@ function serverSideGetClassDates() {
   const sheet = ss.getSheetByName('Dates');
 
   const dates = sheet.getRange(2, 1, sheet.getLastRow() - 1, 1).getValues()
-  Logger.log(dates)
+  //Logger.log(dates)
   const formattedDates = dates.map(date => Utilities.formatDate(date[0], "GMT", "MM/dd/yyyy"))
   const updatedDates = [...["Select a date"], ...formattedDates]
-  Logger.log(formattedDates)
+  //Logger.log(formattedDates)
   return updatedDates;
 
 }
@@ -191,39 +202,47 @@ function getServerSideGetClassLists(type, id, number = 1) {
 
   if (type === "adults") {
     const adultList = sheet.getRange(2, 2, sheet.getLastRow() - 1, 1).getValues();
+    console.log(adultList)
     list = adultList;
   }
 
   if (type === "students") {
-    const session1List = sheet.getRange(2, 6, sheet.getLastRow() - 1, 1).getValues();
-    const session2List = sheet.getRange(2, 7, sheet.getLastRow() - 1, 1).getValues();
-    list = [session1List, session2List];
+    const session1List = sheet.getRange(2, 6, sheet.getLastRow() - 1, 1).getValues().filter(val => !getNoSesh().includes(val[0])).filter(val => val[0] !== '');
+    //Logger.log(session1List)
+    const session2List = sheet.getRange(2, 7, sheet.getLastRow() - 1, 1).getValues().filter(val => !getNoSesh().includes(val[0])).filter(val => val[0] !== '');
+    //Logger.log(session2List)
+    const noSeshlist = sheet.getRange(2, 6, sheet.getLastRow() - 1, 1).getValues().filter(val => getNoSesh().includes(val[0]))
+    list = [session1List, session2List, noSeshlist];
 
   }
 
-  Logger.log(list)
+  //Logger.log(list)
   const toReturn = {
     "adults": [...["Select a class"], ...list],
     "session1": [...["Select a class"], ...list[0]],
     "session2": [...["Select a class"], ...list[1]],
+    "noSesh": [...["Select a class"], ...list[2]],
     "id": id,
     "number": number
   };
-
+  // Logger.log(toReturn["session1"])
+  // Logger.log(toReturn["session2"])
   return toReturn;
 }
 
-
+function getNoSesh() {
+  return ['PreK', 'Kinder', 'Teen Pathways (Grades 6-12)'];
+}
 function serverSideRegisterFamily(data) {
   const ss = getSs();
   //Add family to response sheet
   const sheet = getSheet('Web App Responses');
   const timestamp = new Date();
-  const range = sheet.getRange(sheet.getLastRow() + 1, 1, data.length, data[0].length + 4)
+  const range = sheet.getRange(sheet.getLastRow() + 1, 1, data.length, data[0].length + 6)
   let id = sheet.getRange(1, 1, sheet.getLastRow()).getValues().length;
   const user = Session.getActiveUser().getEmail();
   console.log(id)
-  const stampedData = data.map((row, index) => [...[timestamp], ...[id + index], ...row, ...[user], ...[true]])
+  const stampedData = data.map((row, index) => [...[timestamp], ...[id + index], ...row, ...[user], ...[true], ...[getRoomNumber(row[3])], ...[getRoomNumber(row[4])]])
   range.setValues(stampedData)
 
   //Add family to sign in sheet
@@ -235,7 +254,8 @@ function serverSideRegisterFamily(data) {
   const familyArr = [...[data[0][0]], ...[lastNames], ...[adults.join()], ...[children.join()]]
   //console.log(familyArr)
   signInRange.setValues([familyArr])
-  const sheets = ss.getSheets().filter(sheet => sheet.getName().startsWith("S2-") || sheet.getName().startsWith("S1-"));
+  const noSession = getNoSesh()
+  const sheets = ss.getSheets().filter(sheet => sheet.getName().startsWith("S2-") || sheet.getName().startsWith("S1-") || noSession.includes(sheet.getName()));
 
 
 
@@ -244,27 +264,51 @@ function serverSideRegisterFamily(data) {
 
 }
 
-function addStudentToClass(person, sheets) {
-  console.log(person[5])
-  console.log(person[6])
-  const firstClassname = `S1-${person[5]}`;
-  console.log(firstClassname)
-  const secondClassName = `S2-${person[6]}`;
-  console.log(secondClassName)
-
-  const class1 = sheets.find(sheet => sheet.getName() === firstClassname);
-  const class2 = sheets.find(sheet => sheet.getName() === secondClassName);
+function setStudentClassVals(person, course) {
+  // Logger.log(course.getName())
   const familyId = person[2]
   const famUId = person[1]
   const firstName = person[3]
   const lastName = person[4]
   const regArr = [famUId, lastName, firstName, familyId, true]
   console.log(regArr)
-
-  class1.getRange(class1.getLastRow() + 1, 1, 1, 5).setValues([regArr])
-  class2.getRange(class2.getLastRow() + 1, 1, 1, 5).setValues([regArr])
+  course.getRange(course.getLastRow() + 1, 1, 1, 5).setValues([regArr]);
 }
 
+function addStudentToClass(person, sheets) {
+  const noSesh = getNoSesh()
+  if (noSesh.includes(person[5])) {
+    //console.log("This student is a noSesh")
+    const onlyClass = sheets.find(sheet => sheet.getName() === person[5])
+    //  Logger.log(`ONLY class is ${onlyClass}`)
+    setStudentClassVals(person, onlyClass);
+    return;
+  }
+
+  const firstClassname = `S1-${person[5]}`;
+  const secondClassName = `S2-${person[6]}`;
+  const class1 = sheets.find(sheet => sheet.getName() === firstClassname);
+  //  Logger.log(`Class1 class ${class1.getName()}`)
+  const class2 = sheets.find(sheet => sheet.getName() === secondClassName);
+  // Logger.log(`Class2 class is ${class2.getName()}`)
+  setStudentClassVals(person, class1)
+  setStudentClassVals(person, class2)
+
+}
+
+function getRoomNumber(val) {
+  Logger.log(val)
+  const sheet = getSheet("Room Numbers");
+  const data = sheet.getRange(1, 1, sheet.getLastRow() - 1, 3).getValues();
+  Logger.log(data)
+  const match = data.find(row => row[2].includes(val))[1]
+  Logger.log(match)
+  return match;
+}
+
+function getIt() {
+  getRoomNumber('Beginner English')
+}
 
 function serverSideMarkInactive(num, date) {
   const ss = getSs();

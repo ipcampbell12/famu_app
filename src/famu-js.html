@@ -7,6 +7,7 @@
 
   const grades = {
     "PreK": "PreK",
+    "Kinder": "Kinder",
     "1": "1st Grade",
     "2": "2nd Grade",
     "3": "3rd Grade",
@@ -53,7 +54,7 @@
                   ${numOptions("num")}
               </select>
               <button type="button" class="px-1 btn btn-primary ms-1 px-1 submit-button" id="button-${family[0]}">Submit</button>
-              <button type="button" class="px-1 btn btn-danger ms-2 px-1 submit-button" id="button-${family[0]}-inactive">Mark Inactive</button>
+              <button type="button" class="px-1 btn btn-danger ms-2 px-1 submit-button" id="button-${family[0]}-inactive" disabled>Mark Inactive</button>
             </div>
           </div>
       `;
@@ -110,14 +111,16 @@
           </div>
       `;
 
+  //fake string
+  // <div class="card-title ms-2 px-1 fs-6 d-none">  <strong>FamU Id:</strong> ${name[0]}</div>
+  //               <div class="card-text ms-2 px-1 fs-6">  <strong>Last:</strong>${name[1]}</div>
+  //               <div class="card-text ms-2 px-1 fs-6">  <strong> First:</strong>${name[2]}</div>
 
   const nameOptions = (name) => `
-          <div class="card not-taken" style="width:auto;" id="outer-${name[0]}">
-            <div class="card-body card-container" id="family-${name[2]}">
-              <h5 class="card-title ms-3 px-2">  FamU Id: ${name[0]}</h5>
-              <div class="card-text ms-3 px-2 "> Last: ${name[1]}</div>
-              <div class="card-text ms-3 px-2 "> First: ${name[2]}</div>
-              <select class="form-select ms-3 px-2 form-select-sm select" id="adults-${name[0]}" onchange="changeAttendanceColor(event)">
+          <div class="card not-taken attendance-card" style="width:45%;" id="outer-${name[0]}">
+            <div class="card-body card-container" id="family-${name[3]}">
+              <div class="card-title ms-2 m2-2 px-1 fs-6" id="famuId-${name[0]}">  ${name[1]}, ${name[2]}</div>
+              <select class="form-select ms-2 me-2 px-1 form-select-sm select fs-6" id="adults-${name[0]}" onchange="changeAttendanceColor(event)">
                   ${classAttendanceOptions([name[5]])}
               </select>
             </div>
@@ -184,11 +187,13 @@
 
   function displayClasses(data) {
     const div = getElement("class-attendance");
-    const session = getValue('first-or-second')
+    const session = getValue('first-or-second');
+    const type = getValue('adults-or-students');
     let list;
-    console.log('first-or-second')
-    if (session === "Session1") list = data["session1"];
-    if (session === "Session2") list = data["session2"];
+    if (type === "adults") list = data["adults"];
+    if (type === "students" && session === "Session1") list = data["session1"];
+    if (type === "students" && session === "Session2") list = data["session2"];
+    if (type === "students" && session === "noSesh") list = data["noSesh"]
     console.log(list)
     const options = renderData(list, showOptions)
     div.innerHTML = options
@@ -246,6 +251,7 @@
 
     const session1 = courses["session1"];
     const session2 = courses["session2"];
+    const noSesh = courses['noSesh'].filter(val => val !== 'Select a class').map(course => showOptions(course));
     const id = courses["id"];
     const type = id.split('-')[0];
     //console.log(type)
@@ -253,7 +259,7 @@
     const number = courses["number"];
     let classesHtml;
     if (type === "student") {
-      classesHtml = [session1.map(course => showOptions(course)), session2.map(course => showOptions(course))]
+      classesHtml = [session1.map(course => showOptions(course)).concat(noSesh), session2.map(course => showOptions(course)).concat(noSesh)]
     }
 
     if (type === "adult") {
@@ -365,11 +371,15 @@
 
     const attendance = []
     for (let child of children) {
+      console.log(child)
       let row = []
-      let family = child.children[0].id;
-      let id = family.split('-')[1];
+      const person = child.children[0].children[1];
+      const id = person.id
+      console.log(id)
+      const value = person.value;
+      console.log(value)
       row.push(id)
-      row.push(child.children[0].children[3].value)
+      row.push(value)
       //console.log(row)
       attendance.push(row)
     }
@@ -518,6 +528,7 @@
   function getStudentsInClass(event) {
     addSpinner('class-attendance-spinner')
     const course = event.target.value;
+    console.log(course)
     google.script.run.withSuccessHandler(displayNames).getStudents(course, getValue(funcVals["courses"][1]), getValue(funcVals['courses'][2]));
   }
 
@@ -533,10 +544,10 @@
   document.getElementById('num-students').addEventListener('change', personFormRunner)
   document.getElementById('modal-class-attendance').addEventListener('click', clientSideGetDates)
 
-
+  document.getElementById('adults-or-students').addEventListener('change', clearDropdowns)
   document.getElementById('first-or-second').addEventListener('change', getClassData)
   document.getElementById('class-attendance').addEventListener('change', getStudentsInClass)
-
+  document.getElementById('class-dates').addEventListener('change', clearDropdowns)
 
 
 
@@ -558,11 +569,31 @@
     clearData('clear-families-button')
   }
 
+  function clearFamilyModalNames() {
+    clearData('close-family-signin')
+  }
+
+  function clearDropdowns() {
+    getElement('first-or-second').value = "";
+    getElement('class-attendance').value = "";
+    clearClassNames()
+  }
+
+  function markPresent() {
+    markAll('X')
+  }
+  function markAbsent() {
+    markAll('ABS')
+  }
 
   function familySelect(num) {
 
     const adults = document.getElementById(`adults-${num}`).value;
     const students = document.getElementById(`students-${num}`).value;
+    if (adults === "Number of Adults" || students === "Number of Students") {
+      addAlert('liveAlertPlaceholder', "danger", "You have to choose a valid number!");
+      return;
+    }
 
     addSpinner()
     google.script.run.withSuccessHandler(addAlert('liveAlertPlaceholder', "success", 'Family signed in!')).markAttendance(num, adults, students, getValue(funcVals["families"][2]))
@@ -599,13 +630,13 @@
   function changeAttendanceColor(event) {
     const selection = event.target.id;
     const num = selection.split("-")[1]
-    console.log(selection)
-    console.log(num)
+    //console.log(selection)
+    // console.log(num)
     const element = document.getElementById(selection)
-    console.log(element)
+    //console.log(element)
 
     const value = element.value;
-    console.log(value)
+    //console.log(value)
     changeColor(num, value)
 
   }
@@ -693,6 +724,7 @@
       'clear-students-button': 'name-list',
       'clear-families-button': 'family',
       'name-list': 'name-list',
+      "close-family-signin": 'family',
       'student-container': 'student-container',
       'adult-container': 'adult-container'
     }
@@ -770,6 +802,25 @@
 
 
     console.log("clearRegistrationOptions function has run")
+  }
+
+
+  function markAll(type) {
+    const element = getElement('name-list')
+
+    //console.log(element)
+    const children = element.children
+    //console.log(children)
+
+    for (let child of children) {
+      const personId = child.id.split('-')[1]
+      // console.log(personId)
+      const iterEl = child.children[0].children[1].id;
+      //console.log(iterEl)
+      const selectEl = getElement(iterEl)
+      selectEl.value = type
+      changeColor(personId, type)
+    }
   }
 
 
